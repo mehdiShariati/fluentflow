@@ -4,22 +4,42 @@
 [![Web](https://github.com/mehdi/fluentflow/actions/workflows/web.yml/badge.svg)](https://github.com/mehdi/fluentflow/actions/workflows/web.yml)
 [![Docs](https://github.com/mehdi/fluentflow/actions/workflows/docs.yml/badge.svg)](https://github.com/mehdi/fluentflow/actions/workflows/docs.yml)
 
-**FluentFlow** is a production-minded, **speaking-first** language learning stack: learners pick scenarios, join a **LiveKit** room with a **Python voice agent** (OpenAI Realtime), and receive **post-session feedback** (OpenAI `gpt-4o-mini` when configured, otherwise a deterministic stub). A **Go** API owns auth, profiles, experiments, session lifecycle, analytics events, and **Prometheus** metrics. The **Next.js** app is the learner UI.
+## Why FluentFlow
+
+Most language apps optimize for **passive drills**. Real fluency needs **high-frequency spoken production**—safe practice, quick feedback, and a system that does not fall over when you add voice, agents, and analytics.
+
+**FluentFlow** is an end-to-end stack for **speaking-first** learning: learners pick scenarios, join a **LiveKit** room, talk with a **Python voice agent** (OpenAI Realtime when configured), and get **post-session feedback** (OpenAI `gpt-4o-mini` or a deterministic stub). A **Go** API owns auth, profiles, sessions, experiments, events, and **Prometheus** metrics; **Next.js** is the learner UI.
+
+**System design is intentional:** the API is **stateless** and **horizontally scalable**; **Postgres** holds durable state; the **realtime** path (LiveKit + agent workers) scales separately; **migrations** are embedded; **metrics and health** are built for production operation—not a demo glued to a single machine.
+
+The **problem framing and narrative**—why this exists beyond a feature list—are in **[docs/vision.md](docs/vision.md)** (and [VISION.md](VISION.md) points there). Deep dives: **[docs/scaling.md](docs/scaling.md)**, **[docs/monitoring.md](docs/monitoring.md)**.
+
+---
+
+## At a glance
+
+| Layer | Stack |
+|-------|--------|
+| Web | Next.js (App Router), LiveKit client |
+| API | Go (chi), JWT, Postgres (pgx), `/healthz`, `/metrics` |
+| Realtime | LiveKit server, WebRTC |
+| Agent | Python (`livekit-agents`), Silero VAD, OpenAI Realtime |
+| Data | PostgreSQL — users, sessions, transcripts, feedback, experiments |
 
 | Resource | Link |
 |----------|------|
-| **Online documentation** (GitHub Pages) | After you enable Pages: `https://<your-username>.github.io/<repository-name>/` — see [docs/deployment.md](docs/deployment.md) |
+| **Vision & story** | [docs/vision.md](docs/vision.md) |
+| **Scaling & system design** | [docs/scaling.md](docs/scaling.md) |
+| **Monitoring & durability signals** | [docs/monitoring.md](docs/monitoring.md) |
+| **Online docs** (GitHub Pages) | After you enable Pages: `https://<your-username>.github.io/<repository-name>/` — [docs/deployment.md](docs/deployment.md) |
 | **Product / systems PRD** | [docs/prd.md](docs/prd.md) |
 | **PRD → implementation map** | [docs/IMPLEMENTATION_MATRIX.md](docs/IMPLEMENTATION_MATRIX.md) |
-| **Recruiter narrative** | [RECRUITER.md](RECRUITER.md) |
-
-**Why it exists:** Most language apps optimize for passive drills. This project demonstrates **real-time voice**, **explicit agent dispatch**, **experiment assignment**, **observability hooks**, and a **thin live path vs async feedback** split — the kind of story hiring teams expect on senior AI/platform portfolios.
 
 ---
 
 ## Table of contents
 
-1. [What this demonstrates](#what-this-demonstrates)
+1. [What this system includes](#what-this-system-includes)
 2. [Architecture](#architecture-systems)
 3. [Quick start (Docker)](#quick-start-docker)
 4. [Tests and verification](#tests-and-verification)
@@ -30,19 +50,21 @@
 9. [API surface (v1)](#api-surface-v1)
 10. [Key technical decisions](#key-technical-decisions)
 11. [Repository layout](#repository-layout)
-12. [License](#license)
+12. [Open to opportunities](#open-to-opportunities)
+13. [License](#license)
 
 ---
 
-## What this demonstrates
+## What this system includes
 
-- **LiveKit end-to-end:** self-hosted `livekit-server` (dev), browser client (`livekit-client`), join tokens minted by your API with **`roomConfig` agent dispatch** (see [LiveKit agent dispatch](https://docs.livekit.io/agents/server/agent-dispatch/)).
+- **LiveKit end-to-end:** self-hosted `livekit-server` (dev), browser `livekit-client`, join tokens from your API with **`roomConfig` agent dispatch** (see [LiveKit agent dispatch](https://docs.livekit.io/agents/server/agent-dispatch/)).
 - **Voice agent:** `livekit-agents` worker with **Silero VAD** + **OpenAI Realtime** (`OPENAI_API_KEY` required for real speech).
 - **Session UX:** chat-style transcript, de-duplication, per-message **Translate** / **Analyze** (API-backed with stub fallbacks).
 - **Backend:** modular Go service (Chi, JWT, bcrypt, pgx, CORS, `/metrics`, `/healthz`).
-- **Data:** Postgres for users, profiles, sessions, events, experiments, flags, feedback, learning snapshots.
-- **Product instrumentation:** session event taxonomy, experiment snapshots, feature flags.
-- **CI:** GitHub Actions for Go, web, and **documentation** builds.
+- **Data & durability:** Postgres for users, profiles, sessions, events, experiments, flags, feedback, learning snapshots — **durable** lifecycle and audit-friendly event streams, not ephemeral process state.
+- **Scale-ready shape:** stateless API tier (add replicas behind a load balancer), separable LiveKit and **horizontal agent workers**; see [Scaling](docs/scaling.md).
+- **Product instrumentation:** session event taxonomy, experiment snapshots, feature flags — aligned with **metrics** and future analytics pipelines.
+- **CI:** GitHub Actions for Go, web, and documentation builds.
 
 ---
 
@@ -186,6 +208,7 @@ make docs
 
 | Topic | File |
 |-------|------|
+| Vision & story | [docs/vision.md](docs/vision.md) |
 | Getting started | [docs/getting-started.md](docs/getting-started.md) |
 | GitHub + production deployment | [docs/deployment.md](docs/deployment.md) |
 | Scaling | [docs/scaling.md](docs/scaling.md) |
@@ -212,7 +235,7 @@ The API is **stateless** behind a load balancer; **Postgres**, **LiveKit**, and 
 
 ## Monitoring
 
-The Go API exposes **`GET /healthz`** (liveness) and **`GET /metrics`** (Prometheus). Metrics include `fluentflow_http_requests_total`, `fluentflow_http_request_duration_seconds`, and `fluentflow_session_events_ingested_total`. Internal admin routes under `/internal/v1/` require `ADMIN_TOKEN`.
+The Go API exposes `GET /healthz` (liveness) and `GET /metrics` (Prometheus). Metrics include `fluentflow_http_requests_total`, `fluentflow_http_request_duration_seconds`, and `fluentflow_session_events_ingested_total`. Internal admin routes under `/internal/v1/` require `ADMIN_TOKEN`.
 
 **Full runbook:** **[docs/monitoring.md](docs/monitoring.md)** — scrape config, PromQL examples, Grafana panels, alerting, logs, and trace extensions.
 
@@ -251,9 +274,10 @@ The Go API exposes **`GET /healthz`** (liveness) and **`GET /metrics`** (Prometh
 ## Key technical decisions
 
 1. **Agent dispatch in the join token** — fewer moving parts; dispatch remains explicit via `agent_name` on the worker.
-2. **OpenAI at two speeds** — Realtime for live tutoring; `gpt-4o-mini` for structured post-session feedback.
-3. **Postgres as source of truth** — sessions and `session_events` for dashboards and export.
-4. **Prometheus first** — `/metrics`; traces can be added without changing the domain model.
+2. **OpenAI at two speeds** — Realtime for live tutoring; `gpt-4o-mini` for structured post-session feedback (cost/latency tradeoff for the async path).
+3. **Postgres as source of truth** — sessions and `session_events` for dashboards, export, and **durability** across deploys and replicas.
+4. **Stateless API** — JWT + DB back correctness so you can **scale HTTP** independently of LiveKit and agent pools.
+5. **Prometheus first** — `/metrics` and `/healthz` for **operational** scaling (SLIs, alerting, load balancer probes); traces can layer on later.
 
 ---
 
@@ -275,6 +299,12 @@ mkdocs.yml         # Documentation site config
 
 ---
 
+## Open to opportunities
+
+I am open to **senior/staff** roles in platform engineering, AI product engineering, and realtime / infrastructure-adjacent teams. Replace the placeholders in **[docs/vision.md](docs/vision.md)** with your LinkedIn and email, or add them to your GitHub profile.
+
+---
+
 ## License
 
-Portfolio / educational use unless you add your own license.
+Use and extend under your own terms; add an explicit license file if you need a standard OSS license.

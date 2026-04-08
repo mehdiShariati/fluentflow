@@ -71,7 +71,7 @@ But the real differentiator is not just “using AI.” It is building an AI pro
 
 # 4. Portfolio Positioning Goal
 
-This project must signal to recruiters, hiring managers, founders, and engineers that the builder can do all of the following:
+This project must signal to reviewers, hiring managers, founders, and engineers that the builder can do all of the following:
 
 ## Product thinking
 
@@ -442,7 +442,7 @@ User sees measurable progression over time.
 
 ### Why it matters
 
-Users need proof of progress; recruiters need proof you understand retention mechanics.
+Users need proof of progress; reviewers evaluating the project need proof you understand retention mechanics.
 
 ---
 
@@ -1025,7 +1025,7 @@ Trace the entire turn lifecycle:
 * TTS finish
 * playback begin
 
-This is an excellent recruiter signal because it proves you understand where user experience is won or lost.
+This is an excellent portfolio signal because it proves you understand where user experience is won or lost.
 
 ---
 
@@ -1420,7 +1420,7 @@ This is optional in many PRDs, but for your portfolio it is a killer addition.
 * rate-limit abuse
 * track cost per completed session
 
-This tells recruiters you think like a founder, not just a builder.
+This tells reviewers you think like a founder, not just a builder.
 
 ---
 
@@ -1444,7 +1444,7 @@ The MVP is successful if it can demonstrate:
 
 ## Portfolio success
 
-A recruiter or hiring manager should be able to look at the project and say:
+A reviewer or hiring manager should be able to look at the project and say:
 
 * this person understands product
 * this person understands systems
@@ -1539,7 +1539,7 @@ That framing immediately upgrades how people read your work.
 
 ---
 
-# 32. Recruiter-Killer README Structure
+# 32. Effective README Structure
 
 This matters a lot. A weak README can make a strong project look average.
 
@@ -1567,7 +1567,7 @@ Example:
 
 > Most language learning apps optimize for passive repetition instead of real spoken fluency. FluentFlow explores how real-time AI voice tutors, adaptive feedback, and measurable experimentation can create a better speaking-first learning experience.
 
-This tells recruiters you are solving a real problem.
+This tells readers you are solving a real problem.
 
 ---
 
@@ -1585,7 +1585,7 @@ Example:
 * Scalable system design decisions
 * Adaptive learning and post-session feedback
 
-This section lets recruiters instantly understand why the project is impressive.
+This section lets readers instantly understand why the project is impressive.
 
 ---
 
@@ -1621,7 +1621,7 @@ At minimum show:
 * observability stack
 * experiment service
 
-The architecture section is one of the biggest recruiter hooks.
+The architecture section is one of the biggest hooks for reviewers.
 
 ---
 
@@ -1653,7 +1653,7 @@ Write:
 * Why feature flags were included from the start
 * Why observability is part of core architecture
 
-Recruiters love deliberate tradeoffs.
+Reviewers appreciate deliberate tradeoffs.
 
 ---
 
@@ -1768,7 +1768,7 @@ What you asked for here.
 
 ## 2. README
 
-The recruiter-facing version.
+The public-facing README version.
 
 ## 3. Architecture diagram
 
@@ -1805,4 +1805,4 @@ That is the story.
 
 And this PRD should support that exact story.
 
-If you want, next I can turn this into a **polished portfolio-ready document with cleaner formatting and executive style**, or I can write the **recruiter-killer README in full**.
+If you want, next I can turn this into a **polished portfolio-ready document with cleaner formatting and executive style**, or I can write the **polished README in full**.

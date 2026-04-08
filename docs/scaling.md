@@ -1,6 +1,6 @@
 # Scaling
 
-This guide describes how to scale **FluentFlow** components safely: the **Go API**, **PostgreSQL**, **LiveKit**, **Next.js**, and **Python agent workers**, plus cross-cutting concerns (sessions, cost, and backpressure).
+**FluentFlow** is laid out so **durability** and **scale** are first-class concerns: the **API** stays stateless for horizontal scale; **Postgres** owns durable domain state; **LiveKit** and **agents** scale on their own axes. This guide turns that structure into concrete steps for the **Go API**, **PostgreSQL**, **LiveKit**, **Next.js**, and **Python agent workers**, plus cross-cutting concerns (sessions, cost, and backpressure).
 
 ## Architecture recap
 

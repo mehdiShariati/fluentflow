@@ -3,7 +3,7 @@
 # Site is deployed to GitHub Pages via .github/workflows/docs.yml
 
 site_name: FluentFlow
-site_description: Real-time AI language learning — architecture, deployment, scaling, and observability.
+site_description: Real-time AI language learning — system design, scalability, durability, deployment, and observability.
 copyright: Copyright &copy; FluentFlow contributors
 
 repo_url: https://github.com/mehdi/fluentflow
@@ -49,6 +49,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Vision & story: vision.md
   - Getting started: getting-started.md
   - Deployment: deployment.md
   - Scaling: scaling.md

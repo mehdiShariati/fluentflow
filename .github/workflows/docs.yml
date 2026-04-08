@@ -10,12 +10,16 @@ on:
       - "docs/**"
       - "mkdocs.yml"
       - "requirements-docs.txt"
+      - "VISION.md"
+      - "README.md"
       - ".github/workflows/docs.yml"
   pull_request:
     paths:
       - "docs/**"
       - "mkdocs.yml"
       - "requirements-docs.txt"
+      - "VISION.md"
+      - "README.md"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
