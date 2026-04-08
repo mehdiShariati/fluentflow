@@ -1,97 +1,77 @@
-# Deployment
+# Deploying FluentFlow (production)
 
-This page explains how to **host the repository on GitHub**, publish **online documentation** with **GitHub Pages**, and outline **production deployment** patterns for the FluentFlow stack.
+FluentFlow is a **multi-service** application. In production you run these parts together (or split across hosts), with **TLS** for the browser and **WSS** for LiveKit:
 
-## 1. Publish the project on GitHub
+| Component | Role |
+|-----------|------|
+| **PostgreSQL** | Durable storage: users, sessions, events, transcripts, feedback, experiments |
+| **LiveKit server** | WebRTC SFU: learner and agent audio in the same room |
+| **Go API** | Auth, session lifecycle, join tokens (with agent dispatch), metrics, feedback |
+| **Next.js web** | Learner UI; must call the **public** API URL |
+| **Python agent** | `livekit-agents` worker: voice tutor (OpenAI Realtime + VAD when configured) |
 
-1. Create a new repository on GitHub (empty, no README if you are pushing an existing tree).
-2. On your machine, from the project root:
+Local development uses **`docker compose`** with [`docker-compose.yml`](https://github.com/mehdiShariati/fluentflow/blob/main/docker-compose.yml) as a reference for **service names, ports, and environment wiring**. Production uses the same **images** (`Dockerfile.api`, `web/Dockerfile`, `agent/Dockerfile`) on your own infrastructure.
 
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial import: FluentFlow stack"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_ORG/YOUR_REPO.git
-   git push -u origin main
-   ```
+---
 
-3. Replace `YOUR_ORG/YOUR_REPO` with your account or organization and repository name.
+## Environment variables (must stay consistent)
 
-4. **Protect `main`** (optional but recommended): Settings → Branches → add a rule requiring pull requests and status checks before merge.
+| Area | Purpose |
+|------|---------|
+| **API** | `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS` (your real web origins), `LIVEKIT_URL` (browser-reachable **`wss://`** in production), `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_AGENT_NAME` (must match the agent worker), `OPENAI_API_KEY` for feedback/tools, optional `ADMIN_TOKEN` |
+| **Web** | `NEXT_PUBLIC_API_URL` — full public base URL of the API (e.g. `https://api.example.com`) |
+| **Agent** | Same `LIVEKIT_*` credentials as the API; `LIVEKIT_URL` is often an **internal** URL to LiveKit inside your network; `LIVEKIT_AGENT_NAME` identical to dispatch in tokens; `OPENAI_*` for realtime speech |
 
-## 2. Online documentation with GitHub Pages
+Never commit secrets; inject them from your host’s secret store.
 
-This repository includes **MkDocs** configuration ([`mkdocs.yml`](https://github.com/mehdi/fluentflow/blob/main/mkdocs.yml)) and a workflow **`.github/workflows/docs.yml`** that builds the site and deploys it to **GitHub Pages**.
+---
 
-### Enable Pages
+## HTTPS, WebRTC, and CORS
 
-1. In the GitHub repository: **Settings** → **Pages**.
-2. Under **Build and deployment**, set **Source** to **GitHub Actions** (not “Deploy from a branch” unless you prefer a legacy flow).
+- Serve the **web app over HTTPS**.
+- Point **`LIVEKIT_URL`** at a **`wss://`** endpoint learners can reach.
+- Configure **CORS** on the API for your real web origin(s).
+- Production networks often need **TURN** for WebRTC behind strict NATs; plan ICE/TURN with your LiveKit deployment ([LiveKit docs](https://docs.livekit.io/)).
 
-### Deploy
+---
 
-- Every **push** to **`main`** or **`master`** runs **Deploy documentation** (MkDocs → GitHub Pages). You do **not** need to touch only `docs/` for the first deploy.
-- You can also run it by hand: **Actions** → **Deploy documentation** → **Run workflow** (pick your default branch).
+## LiveKit: self-hosted vs managed
 
-### If `https://<user>.github.io/<repo>/` returns 404
+- **Source & community:** [github.com/livekit](https://github.com/livekit) — server, [`agents`](https://github.com/livekit/agents), SDKs, and related tools.
+- **Self-hosted:** run `livekit-server` with a proper config, clustering if needed, and correct **UDP/TCP** exposure behind your firewall or cloud SGs.
+- **Managed:** [LiveKit Cloud](https://livekit.io/cloud) — point `LIVEKIT_URL` and API keys at the cloud project; reduces SFU operations work.
 
-Usually nothing has been published yet, or the last workflow **failed**.
+For voice-agent architecture and latency, **[Building AI Voice Agents for Production](https://learn.deeplearning.ai/courses/building-ai-voice-agents-for-production/information)** (DeepLearning.AI × LiveKit) complements this stack.
 
-1. Open **Actions** → **Deploy documentation** and confirm a **green** run on your default branch.
-2. If there is no run, push this repo (including `.github/workflows/docs.yml`) or trigger **Run workflow** manually.
-3. Use the **MkDocs** workflow only. Ignore GitHub’s suggested **Next.js** Pages template—this site is **MkDocs**, not a Next.js static export.
-4. **Public repos** get free GitHub Pages; **private** repos need a paid GitHub plan for Pages in many cases.
+---
 
-### Where to find the live docs
+## Database
 
-After the first successful run, the site URL is:
+- Use **managed PostgreSQL** (TLS, backups) in production.
+- Run **migrations** once per release (`internal/migrate` in the API binary) before or during rollout.
 
-```text
-https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/
-```
+---
 
-If the repository is under an organization, use that hostname segment instead of your username.
+## Agent workers
 
-### Optional: custom domain
+- Build from **`agent/Dockerfile`**.
+- Run **multiple replicas** with the same **`LIVEKIT_AGENT_NAME`** so LiveKit can distribute room jobs.
+- Ensure **`OPENAI_API_KEY`** (and model env vars) are set if you want real voice.
 
-1. Add a `CNAME` file to the `docs/` folder (MkDocs copies it to the site root) containing your domain name, or configure the domain in **Settings → Pages**.
-2. Configure DNS `A`/`CNAME` records as described in [GitHub Pages custom domains](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site).
+---
 
-### Local preview of documentation
+## Hosting patterns (typical)
 
-```bash
-pip install -r requirements-docs.txt
-mkdocs serve
-```
+- **Containers:** Kubernetes, ECS, Nomad, Docker Swarm — one deployment per service above.
+- **CI/CD:** Build and push images to a registry; deploy with your platform; run migrations as a job.
 
-Open **http://127.0.0.1:8000** to preview before pushing.
+GitHub hosts **this documentation site** (static HTML) only; it does **not** run LiveKit, Postgres, or your API. See the repository **README** for how the docs are built.
 
-## 3. Deploying the application (production overview)
+---
 
-FluentFlow is a **multi-service** system: **PostgreSQL**, **LiveKit**, **Go API**, **Next.js**, and a **Python agent worker**. Production deployment is not a single static binary; you typically orchestrate these with a container platform or VMs.
+## See also
 
-### Environment variables (high level)
-
-| Area | Examples |
-|------|----------|
-| API | `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS`, `LIVEKIT_*`, `OPENAI_API_KEY`, optional `ADMIN_TOKEN` |
-| Web | `NEXT_PUBLIC_API_URL` must point to the public API URL learners use |
-| Agent | `LIVEKIT_*`, `OPENAI_*`, `LIVEKIT_AGENT_NAME` matching API-issued tokens |
-
-Never commit real secrets; use your host’s secret store (GitHub Actions secrets, AWS Secrets Manager, etc.).
-
-### Suggested hosting patterns
-
-- **Containers:** Build images from `Dockerfile.api`, `web/Dockerfile`, and `agent/Dockerfile`; run with Kubernetes, ECS, Nomad, or Docker Swarm.
-- **Managed LiveKit:** [LiveKit Cloud](https://livekit.io/cloud) reduces SFU operations; point `LIVEKIT_URL` and API credentials at the cloud project.
-- **Database:** Managed PostgreSQL (RDS, Cloud SQL, Azure Database, etc.) with TLS and automated backups.
-- **CI/CD:** Extend `.github/workflows` with jobs that build and push images to a registry and deploy to your environment (not included by default — environment-specific).
-
-### HTTPS and the browser
-
-The learner app uses **WebRTC**; production must serve the **web app over HTTPS** and use **WSS** for LiveKit. Terminate TLS at a load balancer or reverse proxy (Caddy, nginx, cloud LB).
-
-### GitHub Actions and “deploy”
-
-**GitHub Pages** in this repo deploys **documentation only**. Application deployment to your cloud is usually a separate pipeline: build images, run migrations, roll out services. The [Scaling](scaling.md) page discusses operational concerns that inform that pipeline.
+- [Getting started](getting-started.md) — local Docker Compose
+- [Build your own](build-your-own.md) — fork, customize, then deploy
+- [Scaling](scaling.md) — capacity and components
+- [Monitoring](monitoring.md) — `/healthz`, `/metrics`, operations

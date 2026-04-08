@@ -33,6 +33,8 @@
 
 ## LiveKit (realtime)
 
+The **[LiveKit organization on GitHub](https://github.com/livekit)** hosts the SFU, agents framework, and client/server SDKs you run in production. For conceptual depth on scaling voice agents, see **[Building AI Voice Agents for Production](https://learn.deeplearning.ai/courses/building-ai-voice-agents-for-production/information)** (DeepLearning.AI).
+
 ### Self-hosted
 
 - LiveKit supports **multi-node** clustering; see [LiveKit self-hosting](https://docs.livekit.io/home/self-hosting/) for Redis-backed coordination and UDP/TCP port planning.

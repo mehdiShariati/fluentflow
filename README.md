@@ -1,14 +1,18 @@
 # FluentFlow — Real-time AI language tutor
 
-[![Go tests](https://github.com/mehdi/fluentflow/actions/workflows/go-test.yml/badge.svg)](https://github.com/mehdi/fluentflow/actions/workflows/go-test.yml)
-[![Web](https://github.com/mehdi/fluentflow/actions/workflows/web.yml/badge.svg)](https://github.com/mehdi/fluentflow/actions/workflows/web.yml)
-[![Docs](https://github.com/mehdi/fluentflow/actions/workflows/docs.yml/badge.svg)](https://github.com/mehdi/fluentflow/actions/workflows/docs.yml)
+[![Go tests](https://github.com/mehdiShariati/fluentflow/actions/workflows/go-test.yml/badge.svg)](https://github.com/mehdiShariati/fluentflow/actions/workflows/go-test.yml)
+[![Web](https://github.com/mehdiShariati/fluentflow/actions/workflows/web.yml/badge.svg)](https://github.com/mehdiShariati/fluentflow/actions/workflows/web.yml)
+[![Docs](https://github.com/mehdiShariati/fluentflow/actions/workflows/docs.yml/badge.svg)](https://github.com/mehdiShariati/fluentflow/actions/workflows/docs.yml)
 
 ## Why FluentFlow
 
 Most language apps optimize for **passive drills**. Real fluency needs **high-frequency spoken production**—safe practice, quick feedback, and a system that does not fall over when you add voice, agents, and analytics.
 
 **FluentFlow** is an end-to-end stack for **speaking-first** learning: learners pick scenarios, join a **LiveKit** room, talk with a **Python voice agent** (OpenAI Realtime when configured), and get **post-session feedback** (OpenAI `gpt-4o-mini` or a deterministic stub). A **Go** API owns auth, profiles, sessions, experiments, events, and **Prometheus** metrics; **Next.js** is the learner UI.
+
+### Use it as your own AI language tutor (starter)
+
+**Anyone** can use this repository to **start** a language-learning product or classroom tool: fork the repo, follow **[docs/getting-started.md](docs/getting-started.md)** to run locally, then **[docs/build-your-own.md](docs/build-your-own.md)** to customize **tutor prompts** (`agent/tutor_agent.py`), **scenarios** (`internal/api/scenarios.go`), UI copy, and deployment. You do not need special permission—add a **license** file if you redistribute your fork.
 
 **System design is intentional:** the API is **stateless** and **horizontally scalable**; **Postgres** holds durable state; the **realtime** path (LiveKit + agent workers) scales separately; **migrations** are embedded; **metrics and health** are built for production operation—not a demo glued to a single machine.
 
@@ -28,10 +32,12 @@ The **problem framing and narrative**—why this exists beyond a feature list—
 
 | Resource | Link |
 |----------|------|
+| **Article (Medium)** | [FluentFlow on Medium](https://medium.com/p/4d894c404772?postPublishedType=initial) |
 | **Vision & story** | [docs/vision.md](docs/vision.md) |
+| **Build your own tutor** (fork, customize, ship) | [docs/build-your-own.md](docs/build-your-own.md) |
 | **Scaling & system design** | [docs/scaling.md](docs/scaling.md) |
 | **Monitoring & durability signals** | [docs/monitoring.md](docs/monitoring.md) |
-| **Online docs** (GitHub Pages) | After you enable Pages: `https://<your-username>.github.io/<repository-name>/` — [docs/deployment.md](docs/deployment.md) |
+| **Online docs** (GitHub Pages) | After you enable Pages: `https://<your-username>.github.io/<repository-name>/` — see [Documentation site (MkDocs)](#documentation-site-mkdocs) |
 | **Product / systems PRD** | [docs/prd.md](docs/prd.md) |
 | **PRD → implementation map** | [docs/IMPLEMENTATION_MATRIX.md](docs/IMPLEMENTATION_MATRIX.md) |
 
@@ -43,7 +49,7 @@ The **problem framing and narrative**—why this exists beyond a feature list—
 2. [Architecture](#architecture-systems)
 3. [Quick start (Docker)](#quick-start-docker)
 4. [Tests and verification](#tests-and-verification)
-5. [Documentation and GitHub Pages](#documentation-and-github-pages)
+5. [Documentation site (MkDocs)](#documentation-site-mkdocs)
 6. [Deployment (production)](#deployment-production)
 7. [Scaling](#scaling)
 8. [Monitoring](#monitoring)
@@ -52,6 +58,8 @@ The **problem framing and narrative**—why this exists beyond a feature list—
 11. [Repository layout](#repository-layout)
 12. [Open to opportunities](#open-to-opportunities)
 13. [License](#license)
+
+*(See also [Build your own AI language tutor](#use-it-as-your-own-ai-language-tutor-starter) above.)*
 
 ---
 
@@ -181,49 +189,33 @@ Avoid `go test ./...` from the repo root if `web/node_modules` contains nested G
 
 ---
 
-## Documentation and GitHub Pages
+## Documentation site (MkDocs)
 
-The repository includes a **MkDocs Material** site ([`mkdocs.yml`](mkdocs.yml), [`docs/`](docs/)) deployed by [`.github/workflows/docs.yml`](.github/workflows/docs.yml).
+The **FluentFlow** technical docs (vision, getting started, **production deployment**, scaling, monitoring) live under [`docs/`](docs/) and are built with **MkDocs Material** ([`mkdocs.yml`](mkdocs.yml)). A successful GitHub Actions run ([`.github/workflows/docs.yml`](.github/workflows/docs.yml)) publishes **static HTML** to **GitHub Pages** — that is **documentation only**, not the running app.
 
-1. Push this repository to GitHub.
-2. **Settings → Pages → Build and deployment → Source:** choose **GitHub Actions**.
-3. Merge to `main` (or run the **Deploy documentation** workflow manually). The site appears at:
+**Enable Pages:** repository **Settings → Pages → Source: GitHub Actions**. **Preview locally:** `pip install -r requirements-docs.txt` then `mkdocs serve`, or `make docs` to build `./site`.
 
-   `https://<github-username>.github.io/<repository-name>/`
-
-**Preview locally:**
-
-```bash
-pip install -r requirements-docs.txt
-mkdocs serve
-```
-
-**Build static site to `./site`:**
-
-```bash
-make docs
-```
-
-**Guides in the docs site:**
+**Guides:**
 
 | Topic | File |
 |-------|------|
+| Article (Medium) | [medium.com/…/4d894c404772](https://medium.com/p/4d894c404772?postPublishedType=initial) |
 | Vision & story | [docs/vision.md](docs/vision.md) |
 | Getting started | [docs/getting-started.md](docs/getting-started.md) |
-| GitHub + production deployment | [docs/deployment.md](docs/deployment.md) |
+| Build your own (customize & ship) | [docs/build-your-own.md](docs/build-your-own.md) |
+| **Production deployment** (FluentFlow stack) | [docs/deployment.md](docs/deployment.md) |
 | Scaling | [docs/scaling.md](docs/scaling.md) |
-| Monitoring (Prometheus, Grafana, alerts) | [docs/monitoring.md](docs/monitoring.md) |
+| Monitoring | [docs/monitoring.md](docs/monitoring.md) |
 
-**Forking:** Badge URLs and `repo_url` in `mkdocs.yml` point at `mehdi/fluentflow` (see `go.mod`). Replace with your fork if needed.
+**Forking:** Badge URLs and `repo_url` in `mkdocs.yml` may still point at the upstream module path; adjust for your fork if needed.
 
 ---
 
 ## Deployment (production)
 
-FluentFlow is **multi-service** (Postgres, LiveKit, API, web, agent). Production usually means **container images**, a **managed database**, **TLS**, and **WSS** for WebRTC.
+FluentFlow is **multi-service** (Postgres, LiveKit, API, web, agent). See **[docs/deployment.md](docs/deployment.md)** for environment variables, TLS/WebRTC, LiveKit, database migrations, and agent replicas.
 
-- **High-level checklist:** [docs/deployment.md](docs/deployment.md) — HTTPS, secrets, optional LiveKit Cloud, CI/CD patterns.
-- **GitHub Actions** in this repo run **tests** and **publish docs**; **application** deploy to your cloud is environment-specific (build/push images, run migrations, roll out).
+CI in this repo runs **tests** and **builds the docs site** for GitHub Pages; **hosting** the live application is on **your** cloud or servers (not GitHub Pages).
 
 ---
 
@@ -294,7 +286,7 @@ web/               # Next.js App Router UI
 agent/             # LiveKit Agents tutor
 docs/              # MkDocs source (plus PRD & matrix)
 mkdocs.yml         # Documentation site config
-.github/workflows/ # CI: Go, Web, Docs → GitHub Pages
+.github/workflows/ # CI: tests + MkDocs → GitHub Pages (docs only)
 ```
 
 ---

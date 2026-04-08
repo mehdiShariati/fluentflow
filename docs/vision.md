@@ -4,6 +4,12 @@ Most language products still optimize for **taps and streaks**, not for the unco
 
 FluentFlow is a **reference implementation** of that idea end to end: scenario-based sessions, a **join token that dispatches a named agent** into the room, durable session state, transcript-aware feedback, and **instrumentation** you can actually run (health, Prometheus metrics, product events).
 
+### For anyone building a language AI product
+
+You do **not** have to treat this as a read-only demo. The intended use includes: **fork**, change **scenarios** and **tutor prompts**, connect your own **domains** and **keys**, and run in **production** on your cloud. The stack is split so teams can own **API**, **realtime**, and **agents** independently as they grow. A practical checklist lives in **[Build your own](build-your-own.md)**.
+
+Helpful background: **[article on Medium](https://medium.com/p/4d894c404772?postPublishedType=initial)**, **[LiveKit on GitHub](https://github.com/livekit)** (WebRTC + agents ecosystem), and **[Building AI Voice Agents for Production](https://learn.deeplearning.ai/courses/building-ai-voice-agents-for-production/information)** (DeepLearning.AI, voice pipelines and production patterns).
+
 ### What we optimize for
 
 - **Speaking-first UX** — real-time voice in the room, not a text chat dressed as a tutor.
@@ -30,7 +36,7 @@ I care about **AI-native learning** and **production-grade realtime systems**. I
 **Connect:** replace these with your own links.
 
 - LinkedIn: `https://www.linkedin.com/in/YOUR_PROFILE`
-- Email: `you@example.com` (optional)
+- Email: `you@example.com` (optional)https://github.com/mehdiShariati/fluentflow
 
 ---
 

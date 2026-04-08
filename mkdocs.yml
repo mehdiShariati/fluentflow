@@ -3,10 +3,10 @@
 # Site is deployed to GitHub Pages via .github/workflows/docs.yml
 
 site_name: FluentFlow
-site_description: Real-time AI language learning — system design, scalability, durability, deployment, and observability.
+site_description: Open starter for a real-time AI language tutor — run locally, customize, deploy. Go, Next.js, LiveKit, Python agent.
 copyright: Copyright &copy; FluentFlow contributors
 
-repo_url: https://github.com/mehdi/fluentflow
+repo_url: https://github.com/mehdiShariati/fluentflow
 repo_name: fluentflow
 edit_uri: edit/main/docs/
 
@@ -51,6 +51,7 @@ nav:
   - Home: index.md
   - Vision & story: vision.md
   - Getting started: getting-started.md
+  - Build your own: build-your-own.md
   - Deployment: deployment.md
   - Scaling: scaling.md
   - Monitoring: monitoring.md
