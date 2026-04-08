@@ -1,152 +1,277 @@
 # FluentFlow — Production-Ready Real-Time AI Voice Agent
 
-![demo](docs/demo.gif)
+![FluentFlow Demo](docs/demo.gif)
 
-Built a real-time AI system handling voice streaming, agent orchestration, and scalable backend design.
-
-[![Go tests](https://github.com/mehdiShariati/fluentflow/actions/workflows/go-test.yml/badge.svg)](https://github.com/mehdiShariati/fluentflow/actions/workflows/go-test.yml)
-[![Web](https://github.com/mehdiShariati/fluentflow/actions/workflows/web.yml/badge.svg)](https://github.com/mehdiShariati/fluentflow/actions/workflows/web.yml)
-[![Docs](https://github.com/mehdiShariati/fluentflow/actions/workflows/docs.yml/badge.svg)](https://github.com/mehdiShariati/fluentflow/actions/workflows/docs.yml)
-
-> A **scalable real-time AI voice system** built with WebRTC, LiveKit, Go, and OpenAI  
+> A **scalable real-time AI system** built with WebRTC, LiveKit, Go, and OpenAI
 > Designed with **production architecture**, not just a demo
 
 ---
 
-## 🚀 What This Project Shows
+## 🚀 What This Project Demonstrates
 
-This project demonstrates how to build:
+FluentFlow is not just an AI app—it is a **distributed real-time system**.
 
-- real-time AI voice agents (not request/response apps)
-- scalable backend systems (stateless API + durable DB)
-- distributed AI workers (LiveKit agent dispatch)
-- production-ready infrastructure (metrics, health, events)
+This project demonstrates:
 
-👉 This is not a toy project — it is a **system design exercise implemented end-to-end**
+* building **real-time AI voice agents** (not request/response apps)
+* designing **scalable backend systems** (stateless API + durable DB)
+* orchestrating **AI workers in real-time environments**
+* applying **production patterns** (metrics, health, failure isolation)
+
+👉 This is a **system design problem implemented end-to-end**
 
 ---
 
 ## 🔗 Links
 
-- **GitHub (this repo)**  
-  https://github.com/mehdiShariati/fluentflow  
+* **GitHub (this repo)**
+  https://github.com/mehdiShariati/fluentflow
 
-- **Live Documentation (architecture, scaling, deployment)**  
+* **Live Documentation (architecture, scaling, deployment)**
   https://mehdishariati.github.io/fluentflow/
 
-- **LiveKit (realtime infrastructure)**  
-  https://github.com/livekit  
+* **LiveKit (real-time infrastructure)**
+  https://github.com/livekit
 
-- **Learn Voice Agents (recommended course)**  
-  https://learn.deeplearning.ai/courses/building-ai-voice-agents-for-production/information  
+* **Learn AI Voice Agents (recommended course)**
+  https://learn.deeplearning.ai/courses/building-ai-voice-agents-for-production/information
 
 ---
 
-## 🧠 Why This Matters
+## 🧠 Why This Exists
 
-Most AI apps today are built like this:
+Most AI apps today follow a simple pattern:
 
+```
 request → response
+```
 
+That model breaks for voice.
 
-Voice AI does not work that way.
+Voice requires:
 
-It requires:
-- continuous streaming  
-- low latency  
-- real-time coordination  
+* continuous streaming
+* low latency
+* real-time coordination
 
-Which means:
+> You are not building an API—you are building a **real-time system**
 
-> You are building a **distributed real-time system**, not just calling an API
-
----
-
-## 🏗 System Overview
-
-FluentFlow is built with **clear separation of concerns**:
-
-- **Control layer** → Go API + PostgreSQL  
-- **Realtime layer** → LiveKit (WebRTC)  
-- **AI layer** → Python agent workers  
-
-This architecture allows each part to scale independently.
+FluentFlow explores what that looks like in practice.
 
 ---
 
-## ⚡ How LiveKit Is Used
+## 🏗 System Architecture
 
-LiveKit is the core of the real-time system:
+```mermaid
+flowchart TB
+  subgraph Client
+    WEB[Next.js]
+  end
 
-- manages WebRTC connections  
-- routes audio streams (SFU)  
-- handles rooms and participants  
+  subgraph Realtime
+    LK[LiveKit]
+    AG[Agent Workers]
+  end
+
+  subgraph Backend
+    API[Go API]
+    DB[(Postgres)]
+  end
+
+  WEB --> API
+  WEB --> LK
+  API --> DB
+  AG --> LK
+```
+
+### Architecture Principles
+
+* **Stateless API** → horizontally scalable
+* **Realtime separated** → independent scaling
+* **AI workers decoupled** → distributed execution
+* **Postgres as source of truth** → durability
+
+👉 Designed for **production scaling from day one**
+
+---
+
+## ⚡ How It Works (High-Level Flow)
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant API as Go API
+  participant LK as LiveKit
+  participant AG as Agent
+
+  C->>API: Create session
+  API->>C: JWT (room access + agent config)
+  C->>LK: Join room
+  LK->>AG: Dispatch agent
+  AG->>LK: Join + stream audio
+```
 
 ### Key Pattern: Agent Dispatch
 
 Instead of calling the AI directly:
 
-- API generates a JWT with `roomConfig`
-- LiveKit automatically dispatches an agent worker
-- agent joins the room like a participant
+* API generates a JWT with `roomConfig`
+* LiveKit dispatches an agent automatically
+* agent joins as a participant
 
-👉 This is a **production-grade pattern for AI agents**
+👉 This enables **clean, scalable orchestration**
 
 Docs:
 https://docs.livekit.io/agents/server/agent-dispatch/
 
 ---
 
+## 📈 Scaling Strategy (Production Thinking)
+
+FluentFlow scales by **separating concerns**, not scaling a monolith.
+
+---
+
+### API Layer (Stateless)
+
+* no in-memory state
+* horizontally scalable
+* behind load balancer
+
+👉 scales with request volume
+
+---
+
+### Realtime Layer (LiveKit)
+
+* handles WebRTC connections
+* scales independently
+* supports clustering / cloud
+
+👉 scales with concurrent sessions
+
+---
+
+### AI Agent Workers
+
+* horizontally scalable
+* multiple workers per agent
+* distributed via LiveKit
+
+👉 scales with AI workload
+
+---
+
+### Database (Postgres)
+
+* durable state
+* requires:
+
+  * connection pooling
+  * indexing
+  * migration control
+
+👉 scales carefully (stateful)
+
+---
+
+### Key Insight
+
+> Each component scales independently based on its bottleneck
+
+---
+
+### Failure Isolation
+
+* API failure ≠ realtime failure
+* agent crash ≠ system crash
+* DB remains consistent
+
+👉 system degrades gracefully
+
+---
+
 ## ☁️ Deployment Options
 
-### Self-Hosted (used in development)
-- full control  
-- learn WebRTC internals  
-- lower cost  
+### Self-Hosted (Development / Control)
 
-### LiveKit Cloud (recommended for production)
+* full control over infra
+* learn WebRTC internals
+* lower cost
+
+---
+
+### LiveKit Cloud (Production)
+
 https://livekit.io
 
-- managed infrastructure  
-- global low-latency routing  
-- automatic scaling  
+* managed infrastructure
+* global low-latency routing
+* automatic scaling
+
+👉 recommended for production workloads
 
 ---
 
-## 🎓 How to Learn This Stack
+## 🧑‍💻 Tech Stack
 
-If you want to build systems like this:
+| Layer         | Stack                                  |
+| ------------- | -------------------------------------- |
+| Web           | Next.js + LiveKit client               |
+| API           | Go (chi), JWT, PostgreSQL              |
+| Realtime      | LiveKit (WebRTC SFU)                   |
+| AI            | Python (`livekit-agents`, OpenAI, VAD) |
+| Observability | Prometheus (`/metrics`, `/healthz`)    |
 
-👉 https://learn.deeplearning.ai/courses/building-ai-voice-agents-for-production/information  
+---
+
+## 🚀 Quick Start
+
+```bash
+cp .env.example .env
+# add OPENAI_API_KEY
+
+docker compose up --build
+```
+
+Open:
+
+👉 http://localhost:3000
+
+---
+
+## 🎓 Learning Path (Recommended)
+
+If you want to understand this deeply:
+
+👉 https://learn.deeplearning.ai/courses/building-ai-voice-agents-for-production/information
 
 This project is a **practical implementation of those concepts**:
-- real-time pipelines  
-- AI orchestration  
-- production deployment  
+
+* real-time pipelines
+* AI orchestration
+* production deployment
 
 ---
 
-## 🧑‍💻 Use This As a Starter
+## 🧪 Production Features
 
-You can build your own AI product from this:
+* metrics (`/metrics`)
+* health checks (`/healthz`)
+* event tracking
+* feature flags
+* structured feedback pipeline
 
-- customize tutor prompts → `agent/tutor_agent.py`  
-- add scenarios → `internal/api/scenarios.go`  
-- extend UI → `web/`  
-- deploy → see docs  
-
----
-
-## 🏁 Key Engineering Signals
-
-This system is designed with:
-
-- stateless API (horizontal scaling)  
-- durable state (PostgreSQL)  
-- real-time infrastructure (LiveKit)  
-- distributed workers (AI agents)  
-- observability (`/metrics`, `/healthz`)  
-
-👉 These are the same patterns used in production systems
+👉 not a demo—built with **operational thinking**
 
 ---
+
+## 🗂 Repository Structure
+
+```
+cmd/api/           # API entrypoint
+internal/          # backend logic
+agent/             # AI workers
+web/               # frontend
+docs/              # system docs
+```
