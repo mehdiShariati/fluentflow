@@ -33,11 +33,11 @@ This repository is **not** a hosted product or a funding pitch. It is a **workin
 
 I care about **AI-native learning** and **production-grade realtime systems**. I am **open to senior/staff roles** in platform engineering, AI product engineering, or realtime/infra-adjacent teams—roles where this kind of problem shows up for real.
 
-**Connect:** replace these with your own links.
+**Connect:**
 
-- LinkedIn: `https://www.linkedin.com/in/YOUR_PROFILE`
-- Email: `you@example.com` (optional)https://github.com/mehdiShariati/fluentflow
+- **[LinkedIn](https://www.linkedin.com/in/mehdi-shariati-b057b2153/)**
+- **[mehdishariati12@gmail.com](mailto:mehdishariati12@gmail.com)**
 
 ---
 
-*If you are reading the repo on GitHub, the technical entry point is the root [`README.md`](https://github.com/mehdi/fluentflow/blob/main/README.md).*
+*If you are reading the repo on GitHub, the technical entry point is the root [`README.md`](https://github.com/mehdiShariati/fluentflow/blob/main/README.md).*
