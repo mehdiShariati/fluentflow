@@ -3,16 +3,11 @@
 
 name: Deploy documentation
 
+# Push to main always rebuilds Pages so the site is never stuck on “never deployed”
+# (path-only filters are easy to miss and cause 404 on github.io until a doc file changes).
 on:
   push:
-    branches: [main]
-    paths:
-      - "docs/**"
-      - "mkdocs.yml"
-      - "requirements-docs.txt"
-      - "VISION.md"
-      - "README.md"
-      - ".github/workflows/docs.yml"
+    branches: [main, master]
   pull_request:
     paths:
       - "docs/**"
@@ -45,14 +40,18 @@ jobs:
       - name: Build site
         run: mkdocs build
       - name: Upload Pages artifact
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        if: |
+          (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: |
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
       name: github-pages

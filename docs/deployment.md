@@ -31,8 +31,17 @@ This repository includes **MkDocs** configuration ([`mkdocs.yml`](https://github
 
 ### Deploy
 
-- Every push to `main` that changes `docs/**`, `mkdocs.yml`, or the workflow file triggers a docs build and deploy.
-- You can also run the workflow manually: **Actions** → **Deploy documentation** → **Run workflow**.
+- Every **push** to **`main`** or **`master`** runs **Deploy documentation** (MkDocs → GitHub Pages). You do **not** need to touch only `docs/` for the first deploy.
+- You can also run it by hand: **Actions** → **Deploy documentation** → **Run workflow** (pick your default branch).
+
+### If `https://<user>.github.io/<repo>/` returns 404
+
+Usually nothing has been published yet, or the last workflow **failed**.
+
+1. Open **Actions** → **Deploy documentation** and confirm a **green** run on your default branch.
+2. If there is no run, push this repo (including `.github/workflows/docs.yml`) or trigger **Run workflow** manually.
+3. Use the **MkDocs** workflow only. Ignore GitHub’s suggested **Next.js** Pages template—this site is **MkDocs**, not a Next.js static export.
+4. **Public repos** get free GitHub Pages; **private** repos need a paid GitHub plan for Pages in many cases.
 
 ### Where to find the live docs
 
