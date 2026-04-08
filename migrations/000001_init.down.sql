@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS learning_metric_snapshots;
+DROP TABLE IF EXISTS feedback_summaries;
+DROP TABLE IF EXISTS session_events;
+DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS feature_flags;
+DROP TABLE IF EXISTS experiment_assignments;
+DROP TABLE IF EXISTS experiments;
+DROP TABLE IF EXISTS prompt_versions;
+DROP TABLE IF EXISTS user_profiles;
+DROP TABLE IF EXISTS users;

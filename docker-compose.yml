@@ -1,0 +1,105 @@
+# FluentFlow full stack: Postgres, LiveKit (dev), Go API, Next.js web, Python voice agent
+# Browser: http://localhost:3000  ·  LiveKit WS: ws://localhost:7880  ·  API: http://localhost:8080
+#
+# Voice tutor needs OPENAI_API_KEY for the agent (OpenAI Realtime). Without it the agent worker
+# still runs but will not start the speech pipeline — set OPENAI_API_KEY in a root `.env` file.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fluentflow
+      POSTGRES_PASSWORD: fluentflow
+      POSTGRES_DB: fluentflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - fluentflow_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fluentflow -d fluentflow"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --bind 0.0.0.0 --config /etc/livekit.yaml
+    volumes:
+      - ./livekit-docker.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      DATABASE_URL: postgres://fluentflow:fluentflow@postgres:5432/fluentflow?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET:-fluentflow-dev-jwt-secret-change-me}
+      HTTP_ADDR: :8080
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      LIVEKIT_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-secret}
+      LIVEKIT_AGENT_NAME: ${LIVEKIT_AGENT_NAME:-fluentflow-tutor}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      livekit:
+        condition: service_started
+      agent:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+      agent:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    environment:
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-secret}
+      LIVEKIT_AGENT_NAME: ${LIVEKIT_AGENT_NAME:-fluentflow-tutor}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_REALTIME_MODEL: ${OPENAI_REALTIME_MODEL:-gpt-4o-realtime-preview}
+      OPENAI_TRANSCRIPTION_MODEL: ${OPENAI_TRANSCRIPTION_MODEL:-gpt-4o-mini-transcribe}
+      OPENAI_TTS_VOICE: ${OPENAI_TTS_VOICE:-alloy}
+    depends_on:
+      livekit:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  fluentflow_pg:

@@ -1,0 +1,16 @@
+# Local Docker LiveKit - avoids Windows Hyper-V reserved UDP ranges (e.g. 50000-50200).
+# Single UDP mux on 7882 + TCP signaling; matches ports in docker-compose.yml.
+# node_ip=127.0.0.1 ensures browser on same machine gets reachable ICE candidates.
+port: 7880
+
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: false
+  node_ip: 127.0.0.1
+
+keys:
+  devkey: secret
+
+logging:
+  level: info

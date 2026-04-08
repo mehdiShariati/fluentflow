@@ -1,0 +1,61 @@
+# FluentFlow documentation site (MkDocs Material).
+# Build locally: pip install -r requirements-docs.txt && mkdocs serve
+# Site is deployed to GitHub Pages via .github/workflows/docs.yml
+
+site_name: FluentFlow
+site_description: Real-time AI language learning — architecture, deployment, scaling, and observability.
+copyright: Copyright &copy; FluentFlow contributors
+
+repo_url: https://github.com/mehdi/fluentflow
+repo_name: fluentflow
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Deployment: deployment.md
+  - Scaling: scaling.md
+  - Monitoring: monitoring.md
+  - Reference:
+      - Product requirements (PRD): prd.md
+      - Implementation matrix: IMPLEMENTATION_MATRIX.md
+
+plugins:
+  - search

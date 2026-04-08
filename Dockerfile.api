@@ -1,0 +1,24 @@
+# FluentFlow API — multi-stage build (PRD backend)
+FROM golang:1.22-alpine AS build
+RUN apk add --no-cache git ca-certificates
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+
+RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -trimpath -ldflags="-s -w" -o /out/api ./cmd/api
+
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates wget
+COPY --from=build /out/api /usr/local/bin/api
+
+ENV HTTP_ADDR=:8080
+EXPOSE 8080
+
+HEALTHCHECK --interval=5s --timeout=3s --start-period=8s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
+
+ENTRYPOINT ["/usr/local/bin/api"]

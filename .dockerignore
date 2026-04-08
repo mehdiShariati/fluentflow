@@ -1,0 +1,10 @@
+web/
+.git/
+.github/
+bin/
+*.exe
+.env
+.env.*
+!.env.example
+docs/
+*.md

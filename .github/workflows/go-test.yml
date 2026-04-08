@@ -1,0 +1,31 @@
+name: Go tests
+
+on:
+  push:
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "Makefile"
+      - "internal/migrate/**"
+      - ".github/workflows/go-test.yml"
+  pull_request:
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "Makefile"
+      - "internal/migrate/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.18"
+      - name: Vet
+        run: go vet -buildvcs=false ./cmd/... ./internal/...
+      - name: Test
+        run: go test -buildvcs=false ./cmd/... ./internal/... -count=1
